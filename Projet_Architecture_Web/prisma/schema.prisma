@@ -1,0 +1,50 @@
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+model List {
+  id          Int       @id @default(autoincrement())
+  name        String
+  author      String
+  date_debut  DateTime
+  date_fin    DateTime
+  isExpired   Boolean  @default(false)
+  gifts       Gift[]  @relation("ListToGift")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Gift {
+  id          Int       @id @default(autoincrement())
+  name        String
+  description String
+  price        Decimal
+  images      Image[]   @relation("GiftToImage")
+  isReserved  Boolean   @default(false)
+  nameReserver String?
+  dateReservation DateTime?
+  list        List     @relation("ListToGift", fields: [listId], references: [id], onDelete: Cascade)
+  listId      Int
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([listId])
+}
+
+model Image {
+  id          Int       @id @default(autoincrement())
+  gift        Gift      @relation("GiftToImage", fields: [giftId], references: [id], onDelete: Cascade)
+  giftId      Int
+  filename    String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([giftId])
+}
